@@ -404,55 +404,55 @@ def crear_cabecera_contentType():
 
 #MÉTODOS CREAR
 
-
 def usuario_crear(request):
     if request.method == "POST":
         try:
+         
             formulario = UsuarioForm(request.POST, request.FILES)
-            if not formulario.is_valid():
-                return render(request, 'usuarios/crear-usuarios.html', {"formulario": formulario})
-                
-           
-            datos = formulario.cleaned_data.copy()
             
-            if 'foto_perfil' in request.FILES:
+            if not formulario.is_valid():
+                print("Errores de validación:", formulario.errors)
+                return render(request, 'usuarios/crear-usuarios.html', {"formulario": formulario})
+            
+            datos = formulario.cleaned_data.copy()
+
+            if 'foto_perfil' in request.FILES and request.FILES['foto_perfil']:
                 foto = request.FILES['foto_perfil']
                 try:
                     with foto.open('rb') as file:
                         foto_contenido = file.read()
                     encoded = base64.b64encode(foto_contenido).decode('utf-8')
                     datos['foto_perfil'] = f"data:{foto.content_type};base64,{encoded}"
-                   
                 except Exception as e:
                     print(f"Error procesando imagen: {e}")
-                    datos['foto_perfil'] = None
+                    datos['foto_perfil'] = ''  
+            else:
+                datos['foto_perfil'] = '' 
+       
             
             response = helper.realizar_peticion_crear(
                 'usuarios/crear',
                 datos
             )
-            
+           
             if response.status_code == requests.codes.ok:
                 messages.success(request, 'Usuario creado correctamente.')
                 return redirect("lista_usuarios_completa")
-            else:
-                print(f"Error en usuario_crear - Status: {response.status_code}")
-                return tratar_errores(request, response.status_code)
-
-        except HTTPError as http_err:
-            print(f"Error HTTP en usuario_crear: {http_err}")
-            if response.status_code == 400:
+            elif response.status_code == 400:
                 errores = response.json()
-                for error in errores:
-                    formulario.add_error(error, errores[error])
-                return render(request, 'usuarios/crear-usuarios.html', {"formulario": formulario})
-            return tratar_errores(request, response.status_code)
+                for campo, mensaje in errores.items():
+                    formulario.add_error(campo, mensaje)
+            else:
+                messages.error(request, 'Error al crear el usuario.')
+            
+            return render(request, 'usuarios/crear-usuarios.html', {"formulario": formulario})
             
         except Exception as err:
-            print(f"Error general en usuario_crear: {err}")
-            return mi_error_500(request)
-    else:
-        formulario = UsuarioForm(None)
+      
+            messages.error(request, 'Ocurrió un error inesperado.')
+            return render(request, 'usuarios/crear-usuarios.html', {"formulario": formulario})
+    
+    formulario = UsuarioForm()
     return render(request, 'usuarios/crear-usuarios.html', {"formulario": formulario})
 
 def usuario_editar(request, id):

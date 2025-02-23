@@ -177,19 +177,32 @@ class helper:
         return formulario
 
     def realizar_peticion_crear(url, datos, files=None):
-     
-        headers = helper.crear_cabecera_contentType()
-        
-        if files:
-            for key, file in files.items():
-                if file:
-                    datos[key] = helper.procesar_imagen(file)
-
-        return requests.post(
-            f'{settings.API_URL}{url}',
-            headers=headers,
-            data=json.dumps(datos)
-        )
+        try:
+            headers = helper.crear_cabecera_contentType()
+            
+           
+            print(f"URL: {settings.API_URL}{url}")
+            print(f"Headers: {headers}")
+            print(f"Datos a enviar: {json.dumps(datos)[:500]}")  
+            
+            response = requests.post(
+                f'{settings.API_URL}{url}',
+                headers=headers,
+                data=json.dumps(datos)
+            )
+      
+            print(f"Status Code: {response.status_code}")
+            try:
+                print(f"Response: {response.json()}")
+            except:
+                print(f"Response texto: {response.text[:500]}")
+                
+            return response
+            
+        except Exception as e:
+            print(f"Error en realizar_peticion_crear: {e}")
+            raise
+    
 
     def realizar_peticion_actualizar(url, datos, files=None, method='PUT'):
         
