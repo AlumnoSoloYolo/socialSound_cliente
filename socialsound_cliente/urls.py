@@ -35,13 +35,12 @@ urlpatterns = [
      path('likes/crear/', like_crear, name='like_crear'),
      path('likes/eliminar/', like_eliminar, name='like_eliminar'),
 
-
-
-
-
      path('cancion-playlist/crear/', cancion_playlist_crear, name='cancion_playlist_crear'),
      path('cancion-playlist/<int:id>/editar/', cancion_playlist_editar, name='cancion_playlist_editar'),
      path('detalles-album/crear/', detalle_album_crear, name='detalle_album_crear'),
      path('detalles-album/editar/<int:id>/', detalle_album_editar, name='detalle_album_editar'),
+
+     path('registrar/', registrar_usuario, name='registrar_usuario'),
+      path('login/', login_usuario, name='login_usuario'),
 
 ]

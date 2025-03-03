@@ -563,17 +563,6 @@ class LikeDeleteForm(forms.Form):
         )
 
 
-
-
-
-
-
-
-
-
-
-
-
 class CancionPlaylistForm(forms.Form):
     playlist = forms.ChoiceField(
         label="Playlist",
@@ -642,6 +631,30 @@ class DetalleAlbumUpdateForm(forms.Form):
             required=True,
         )
 
-   
+
+
+
+class RegistroForm(forms.Form):
+    username = forms.CharField(label='Nombre de usuario')
+    email = forms.EmailField(label='Email')
+    password1 = forms.CharField(label='Contraseña', widget=forms.PasswordInput)
+    password2 = forms.CharField(label='Confirmar contraseña', widget=forms.PasswordInput)
+    
+    roles = (
+        (1, 'cliente'),
+        (2, 'moderador'),
+    )
+    rol = forms.ChoiceField(choices=roles)  
+    
+
+class LoginForm(forms.Form):
+    usuario = forms.CharField(
+        label='Nombre de usuario',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de usuario'})
+    )
+    password = forms.CharField(
+        label='Contraseña',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Contraseña'})
+    )
 
 

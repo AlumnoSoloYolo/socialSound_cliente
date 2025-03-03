@@ -10,21 +10,48 @@ from django.contrib import messages
 
 class helper:
     
-    def obtener_token_session(usuario,password):
-        token_url = f'{settings.API_URL}oauth2/token/'
+    def obtener_token_session(usuario, password):
+        token_url = f'{settings.API_BASE_URL}oauth2/token/'
+        print(f"URL de token: {token_url}")
+        
         data = {
             'grant_type': 'password',
             'username': usuario,
             'password': password,
-            'client_id': 'musicapp',
-            'client_secret': 'musicapp',
+            'client_id': 'mi_aplicacion',  # Ajusta según tu configuración
+            'client_secret': 'mi_clave_secreta',  # Ajusta según tu configuración
         }
-        response = requests.post(token_url, data=data)
-        respuesta = response.json()
-        if response.status_code == 200:
-            return respuesta.get('access_token')
-        else:
-            raise Exception(respuesta.get("error_description"))
+        
+        print(f"Datos para obtener token: {json.dumps(data)}")
+        
+        try:
+            response = requests.post(token_url, data=data)
+            print(f"Código de respuesta token: {response.status_code}")
+            print(f"Respuesta token: {response.text[:100]}...")
+            
+            if response.status_code == 200:
+                respuesta = response.json()
+                token = respuesta.get('access_token')
+                if token:
+                    return token
+                else:
+                    raise Exception("No se recibió un token de acceso en la respuesta")
+            else:
+                # Intentar obtener mensaje de error
+                try:
+                    respuesta = response.json()
+                    error_msg = respuesta.get("error_description", "Error desconocido")
+                except json.JSONDecodeError:
+                    error_msg = response.text or "Error desconocido"
+                
+                raise Exception(f"Error al obtener token ({response.status_code}): {error_msg}")
+        
+        except requests.RequestException as e:
+            raise Exception(f"Error de conexión: {str(e)}")
+        except json.JSONDecodeError:
+            raise Exception(f"Error al procesar respuesta: formato inválido")
+        except Exception as e:
+            raise Exception(f"Error inesperado: {str(e)}")
         
 
     def obtener_usuario(usuario_id):

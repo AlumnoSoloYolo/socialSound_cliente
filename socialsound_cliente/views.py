@@ -1047,633 +1047,6 @@ def like_eliminar(request):
 
 
 
-# def usuario_crear(request):
-#     if request.method == "POST":
-#         try:
-#             formulario = UsuarioForm(request.POST, request.FILES)
-#             if not formulario.is_valid():
-#                 return render(request, 'usuarios/crear-usuarios.html', {"formulario": formulario})
-                
-#             headers = crear_cabecera_contentType()
-#             datos = formulario.cleaned_data.copy()
-            
-#             if 'foto_perfil' in request.FILES:
-#                 foto = request.FILES['foto_perfil']
-#                 with foto.open('rb') as file:
-#                     foto_contenido = file.read()
-#                 encoded = base64.b64encode(foto_contenido).decode('utf-8')
-#                 datos['foto_perfil'] = f"data:{foto.content_type};base64,{encoded}"
-#             else:
-#                 datos['foto_perfil'] = ''
-            
-#             response = requests.post(
-#                 f'{settings.API_URL}usuarios/crear',
-#                 headers=headers,
-#                 data=json.dumps(datos)
-#             )
-            
-#             if response.status_code == requests.codes.ok:
-#                 messages.success(request, 'Usuario creado correctamente.')
-#                 return redirect("lista_usuarios_completa")
-#             else:
-#                 print(f"Error en usuario_crear - Status: {response.status_code}")
-#                 return tratar_errores(request, response.status_code)
-
-#         except HTTPError as http_err:
-#             print(f"Error HTTP en usuario_crear: {http_err}")
-#             if response.status_code == 400:
-#                 errores = response.json()
-#                 for error in errores:
-#                     formulario.add_error(error, errores[error])
-#                 return render(request, 'usuarios/crear-usuarios.html', {"formulario": formulario})
-#             return tratar_errores(request, response.status_code)
-            
-#         except Exception as err:
-#             print(f"Error general en usuario_crear: {err}")
-#             return mi_error_500(request)
-#     else:
-#         formulario = UsuarioForm(None)
-#     return render(request, 'usuarios/crear-usuarios.html', {"formulario": formulario})
-
-# def album_crear(request):
-#     if request.method == 'POST':
-#         try:
-#             form = AlbumForm(request.POST, request.FILES)
-#             if not form.is_valid():
-#                 print(f"Error de validación en album_crear: {form.errors}")
-#                 return render(request, 'albums/album_crear.html', {'formulario': form})
-
-#             datos = form.cleaned_data.copy()
-            
-#             if 'usuario' in datos:
-#                 datos['usuario'] = int(datos['usuario'])
-
-#             headers = crear_cabecera_contentType()
-
-#             if 'portada' in request.FILES:
-#                 portada = request.FILES['portada']
-#                 with portada.open('rb') as f:
-#                     portada_contenido = f.read()
-#                 encoded = base64.b64encode(portada_contenido).decode('utf-8')
-#                 datos['portada'] = f"data:{portada.content_type};base64,{encoded}"
-#             else:
-#                 datos.pop('portada', None)
-
-#             response = requests.post(
-#                 f'{settings.API_URL}albumes/crear/', 
-#                 headers=headers, 
-#                 json=datos
-#             )
-
-#             if response.status_code in [200, 201]:
-#                 messages.success(request, 'Álbum creado correctamente.')
-#                 return redirect('lista_albumes')
-#             else:
-#                 print(f"Error en album_crear - Status: {response.status_code}")
-#                 return tratar_errores(request, response.status_code)
-
-#         except HTTPError as http_err:
-#             print(f"Error HTTP en album_crear: {http_err}")
-#             if response.status_code == 400:
-#                 errores = response.json()
-#                 for campo, mensaje in errores.items():
-#                     form.add_error(campo, mensaje)
-#                 return render(request, 'albums/album_crear.html', {'formulario': form})
-#             return tratar_errores(request, response.status_code)
-
-#         except Exception as err:
-#             print(f"Error general en album_crear: {err}")
-#             return mi_error_500(request)
-#     else:
-#         form = AlbumForm()
-#     return render(request, 'albums/album_crear.html', {'formulario': form})
-
-# def playlist_crear(request):
-#     if request.method == 'POST':
-#         try:
-#             form = PlaylistForm(request.POST)
-#             if not form.is_valid():
-#                 print(f"Error de validación en playlist_crear: {form.errors}")
-#                 return render(request, 'playlists/crear_playlist.html', {'formulario': form})
-
-#             datos = form.cleaned_data.copy()
-#             datos['canciones'] = request.POST.getlist('canciones')
-
-#             response = requests.post(
-#                 f'{settings.API_URL}playlists/crear/',
-#                 headers=crear_cabecera_contentType(),
-#                 data=json.dumps(datos)
-#             )
-
-#             if response.status_code == requests.codes.ok:
-#                 messages.success(request, 'Playlist creada correctamente.')
-#                 return redirect('lista_playlists')
-#             else:
-#                 print(f"Error en playlist_crear - Status: {response.status_code}")
-#                 return tratar_errores(request, response.status_code)
-
-#         except HTTPError as http_err:
-#             print(f"Error HTTP en playlist_crear: {http_err}")
-#             if response.status_code == 400:
-#                 errores = response.json()
-#                 for error in errores:
-#                     form.add_error(error, errores[error])
-#                 return render(request, 'playlists/crear_playlist.html', {'formulario': form})
-#             return tratar_errores(request, response.status_code)
-
-#         except Exception as err:
-#             print(f"Error general en playlist_crear: {err}")
-#             return mi_error_500(request)
-#     else:
-#         form = PlaylistForm()
-#     return render(request, 'playlists/crear_playlist.html', {'formulario': form})
-
-# def like_crear(request):
-#     if request.method == 'POST':
-#         try:
-#             form = LikeForm(request.POST)
-#             if not form.is_valid():
-#                 print(f"Error de validación en like_crear: {form.errors}")
-#                 return render(request, 'likes/crear_like.html', {'formulario': form})
-
-#             datos = form.cleaned_data.copy()
-            
-#             response = requests.post(
-#                 f'{settings.API_URL}likes/crear/',
-#                 headers=crear_cabecera_contentType(),
-#                 data=json.dumps(datos)
-#             )
-
-#             if response.status_code == requests.codes.ok:
-#                 messages.success(request, 'Like creado correctamente.')
-#                 return redirect('lista_canciones')
-#             else:
-#                 print(f"Error en like_crear - Status: {response.status_code}")
-#                 return tratar_errores(request, response.status_code)
-
-#         except HTTPError as http_err:
-#             print(f"Error HTTP en like_crear: {http_err}")
-#             if response.status_code == 400:
-#                 errores = response.json()
-#                 for campo, mensaje in errores.items():
-#                     form.add_error(campo, mensaje)
-#                 return render(request, 'likes/crear_like.html', {'formulario': form})
-#             return tratar_errores(request, response.status_code)
-
-#         except Exception as err:
-#             print(f"Error general en like_crear: {err}")
-#             return mi_error_500(request)
-#     else:
-#         form = LikeForm()
-#     return render(request, 'likes/crear_like.html', {'formulario': form})
-
-
-
-
-# MÉTODOS EDITAR
-
-# def usuario_editar(request, id):
-#     if request.method == "POST":
-#         try:
-#             formulario = UsuarioUpdateForm(request.POST, request.FILES)
-#             if not formulario.is_valid():
-#                 print(f"Error de validación en usuario_editar: {formulario.errors}")
-#                 return render(request, 'usuarios/editar-usuario.html', 
-#                             {"formulario": formulario, "id": id})
-                
-#             headers = crear_cabecera_contentType()
-#             datos = formulario.cleaned_data.copy()
-
-#             if not datos.get('password'):
-#                 datos.pop('password', None)
-
-       
-#             if 'foto_perfil' in request.FILES:
-#                 foto = request.FILES['foto_perfil']
-#                 with foto.open('rb') as file:
-#                     foto_contenido = file.read()
-#                 encoded = base64.b64encode(foto_contenido).decode('utf-8')
-#                 datos['foto_perfil'] = f"data:{foto.content_type};base64,{encoded}"
-#             else:
-#                 datos.pop('foto_perfil', None)      
-            
-#             response = requests.put(
-#                 f'{settings.API_URL}usuarios/{id}/actualizar',
-#                 headers=headers,
-#                 data=json.dumps(datos)
-#             )
-            
-#             if response.status_code == requests.codes.ok:
-#                 messages.success(request, 'Usuario editado correctamente.')
-#                 return redirect("lista_usuarios_completa")
-#             else:
-#                 print(f"Error en usuario_editar - Status: {response.status_code}")
-#                 return tratar_errores(request, response.status_code)
-
-#         except HTTPError as http_err:
-#             print(f"Error HTTP en usuario_editar: {http_err}")
-#             if response.status_code == 400:
-#                 errores = response.json()
-#                 for error in errores:
-#                     formulario.add_error(error, errores[error])
-#                 return render(request, 'usuarios/editar-usuario.html', 
-#                             {"formulario": formulario, "id": id})
-#             return tratar_errores(request, response.status_code)
-
-#         except Exception as err:
-#             print(f"Error general en usuario_editar: {err}")
-#             return mi_error_500(request)
-
-#     else:
-#         try:
-#             usuario = helper.obtener_usuario(id)
-#             formulario = UsuarioForm(initial={
-#                 'nombre_usuario': usuario['nombre_usuario'],
-#                 'email': usuario['email'],
-#                 'bio': usuario.get('bio', ''),
-#                 'foto_perfil': usuario.get('foto_perfil', '')
-#             })
-#         except Exception as err:
-#             print(f"Error al obtener usuario para editar: {err}")
-#             return mi_error_500(request)
-
-#     return render(request, 'usuarios/editar-usuario.html', {"formulario": formulario, "id": id})
-
-# def usuario_editar_nombre(request, usuario_id):
-#     try:
-#         usuario = helper.obtener_usuario(usuario_id)
-#         formulario = UsuarioActualizarNombreForm(request.POST or None, initial={'nombre_usuario': usuario['nombre_usuario']})
-#     except Exception as err:
-#         print(f"Error al obtener usuario para editar nombre: {err}")
-#         return mi_error_500(request)
-    
-#     if request.method == "POST":
-#         try:
-#             if not formulario.is_valid():
-#                 print(f"Error de validación en usuario_editar_nombre: {formulario.errors}")
-#                 return render(request, 'usuarios/actualizar_nombre.html', {"formulario": formulario, "usuario": usuario})
-
-#             headers = crear_cabecera_contentType()
-#             datos = request.POST.copy()
-#             response = requests.patch(
-#                 f'{settings.API_URL}usuarios/actualizar/nombre/{usuario_id}',
-#                 headers=headers,
-#                 data=json.dumps(datos)
-#             )
-#             if response.status_code == requests.codes.ok:
-#                 messages.success(request, 'Nombre de usuario editado.')
-#                 return redirect("lista_usuarios_completa")
-#             else:
-#                 print(f"Error en usuario_editar_nombre - Status: {response.status_code}")
-#                 return tratar_errores(request, response.status_code)
-
-#         except HTTPError as http_err:
-#             print(f"Error HTTP en usuario_editar_nombre: {http_err}")
-#             if response.status_code == 400:
-#                 errores = response.json()
-#                 for error in errores:
-#                     formulario.add_error(error, errores[error])
-#                 return render(request, 'usuarios/actualizar_nombre.html', {"formulario": formulario, "usuario": usuario})
-#             return tratar_errores(request, response.status_code)
-
-#         except Exception as err:
-#             print(f"Error general en usuario_editar_nombre: {err}")
-#             return mi_error_500(request)
-    
-#     return render(request, 'usuarios/actualizar_nombre.html', {"formulario": formulario, "usuario": usuario})
-
-# def album_editar(request, id):
-#     if request.method == 'POST':
-#         try:
-#             form = AlbumUpdateForm(request.POST, request.FILES)
-#             if not form.is_valid():
-#                 print(f"Error de validación en album_editar: {form.errors}")
-#                 return render(request, 'albums/album_editar.html', {'formulario': form, 'id': id})
-
-#             datos = form.cleaned_data.copy()
-#             album = helper.obtener_album(id)
-#             if album:
-#                 datos['usuario'] = album['usuario']
-            
-#             headers = crear_cabecera_contentType()
-
-#             if 'portada' in request.FILES:
-#                 portada = request.FILES['portada']
-#                 with portada.open('rb') as f:
-#                     portada_contenido = f.read()
-#                 encoded = base64.b64encode(portada_contenido).decode('utf-8')
-#                 datos['portada'] = f"data:{portada.content_type};base64,{encoded}"
-#             else:
-#                 datos.pop('portada', None)
-
-#             response = requests.put(
-#                 f'{settings.API_URL}albumes/{id}/editar/', 
-#                 headers=headers, 
-#                 json=datos
-#             )
-
-#             if response.status_code == requests.codes.ok:
-#                 messages.success(request, 'Álbum editado correctamente.')
-#                 return redirect('lista_albumes')
-#             else:
-#                 print(f"Error en album_editar - Status: {response.status_code}")
-#                 return tratar_errores(request, response.status_code)
-
-#         except HTTPError as http_err:
-#             print(f"Error HTTP en album_editar: {http_err}")
-#             if response.status_code == 400:
-#                 errores = response.json()
-#                 for campo, mensaje in errores.items():
-#                     form.add_error(campo, mensaje)
-#                 return render(request, 'albums/album_editar.html', {'formulario': form, 'id': id})
-#             return tratar_errores(request, response.status_code)
-
-#         except Exception as err:
-#             print(f"Error general en album_editar: {err}")
-#             return mi_error_500(request)
-#     else:
-#         try:
-#             album = helper.obtener_album(id)
-#             form = AlbumUpdateForm(initial={
-#                 'titulo': album.get('titulo', ''),
-#                 'artista': album.get('artista', ''),
-#                 'descripcion': album.get('descripcion', '')
-#             })
-#         except Exception as err:
-#             print(f"Error al obtener album para editar: {err}")
-#             return mi_error_500(request)
-            
-#     return render(request, 'albums/album_editar.html', {'formulario': form, 'id': id})
-
-# def album_editar_titulo(request, id):
-#     try:
-#         album = helper.obtener_album(id)
-#         formulario = AlbumActualizarTituloForm(request.POST or None, initial={'titulo': album['titulo']})
-#     except Exception as err:
-#         print(f"Error al obtener album para editar título: {err}")
-#         return mi_error_500(request)
-    
-#     if request.method == "POST":
-#         try:
-#             if not formulario.is_valid():
-#                 print(f"Error de validación en album_editar_titulo: {formulario.errors}")
-#                 return render(request, 'albums/actualizar_titulo.html', {"formulario": formulario, "id": id})
-
-#             headers = crear_cabecera_contentType()
-#             datos = request.POST.copy()
-#             response = requests.patch(
-#                 f'{settings.API_URL}albumes/actualizar/titulo/{id}/',
-#                 headers=headers,
-#                 data=json.dumps(datos)
-#             )
-#             if response.status_code == requests.codes.ok:
-#                 messages.success(request, 'Título del álbum editado correctamente.')
-#                 return redirect("lista_albumes")
-#             else:
-#                 print(f"Error en album_editar_titulo - Status: {response.status_code}")
-#                 return tratar_errores(request, response.status_code)
-
-#         except HTTPError as http_err:
-#             print(f"Error HTTP en album_editar_titulo: {http_err}")
-#             if response.status_code == 400:
-#                 errores = response.json()
-#                 for error in errores:
-#                     formulario.add_error(error, errores[error])
-#                 return render(request, 'albums/actualizar_titulo.html', {"formulario": formulario, "id": id})
-#             return tratar_errores(request, response.status_code)
-
-#         except Exception as err:
-#             print(f"Error general en album_editar_titulo: {err}")
-#             return mi_error_500(request)
-    
-#     return render(request, 'albums/actualizar_titulo.html', {"formulario": formulario, "id": id})
-
-# def playlist_editar(request, id):
-#     try:
-#         playlist = helper.obtener_playlist(id)
-#         if not playlist or 'error' in playlist:
-#             print(f"Error: No se encontró la playlist con id {id}")
-#             return redirect('lista_playlists')
-
-#         usuario_id = playlist.get('usuario')
-#     except Exception as e:
-#         print(f"Error al obtener playlist para editar: {e}")
-#         return redirect('lista_playlists')
-
-#     if request.method == 'POST':
-#         try:
-#             form = PlaylistUpdateForm(request.POST)
-#             if not form.is_valid():
-#                 print(f"Error de validación en playlist_editar: {form.errors}")
-#                 return render(request, 'playlists/editar_playlist.html', {'formulario': form, 'id': id})
-
-#             datos = form.cleaned_data.copy()
-#             datos['usuario'] = usuario_id
-#             headers = crear_cabecera_contentType()
-
-#             response = requests.put(
-#                 f'{settings.API_URL}playlists/{id}/editar/', 
-#                 headers=headers, 
-#                 json=datos
-#             )
-
-#             if response.status_code == requests.codes.ok:
-#                 messages.success(request, 'Playlist editada correctamente.')
-#                 return redirect('lista_playlists')
-#             else:
-#                 print(f"Error en playlist_editar - Status: {response.status_code}")
-#                 return tratar_errores(request, response.status_code)
-
-#         except HTTPError as http_err:
-#             print(f"Error HTTP en playlist_editar: {http_err}")
-#             if response.status_code == 400:
-#                 errores = response.json()
-#                 for campo, mensaje in errores.items():
-#                     form.add_error(campo, mensaje)
-#                 return render(request, 'playlists/editar_playlist.html', {'formulario': form, 'id': id})
-#             return tratar_errores(request, response.status_code)
-
-#         except Exception as err:
-#             print(f"Error general en playlist_editar: {err}")
-#             return mi_error_500(request)
-#     else:
-#         canciones_ids = [cancion.get('id') for cancion in playlist.get('canciones', [])]
-#         form = PlaylistUpdateForm(initial={
-#             'nombre': playlist.get('nombre', ''),
-#             'descripcion': playlist.get('descripcion', ''),
-#             'canciones': canciones_ids,
-#             'publica': playlist.get('publica', False)
-#         })
-
-#     return render(request, 'playlists/editar_playlist.html', {'formulario': form, 'id': id})
-
-# def playlist_editar_canciones(request, id):
-#     try:
-#         playlist = helper.obtener_playlist(id)
-#         if request.method == "POST":
-#             try:
-#                 formulario = PlaylistActualizarCancionesForm(request.POST)
-#                 if not formulario.is_valid():
-#                     print(f"Error de validación en playlist_editar_canciones: {formulario.errors}")
-#                     return render(request, 'playlists/actualizar_canciones.html', {
-#                         "formulario": formulario,
-#                         "playlist": playlist,
-#                         'id': id
-#                     })
-
-#                 headers = crear_cabecera_contentType()
-#                 datos = {
-#                     'canciones': request.POST.getlist('canciones')
-#                 }
-                
-#                 response = requests.patch(
-#                     f'{settings.API_URL}playlists/{id}/actualizar/canciones/',
-#                     headers=headers,
-#                     data=json.dumps(datos)
-#                 )
-#                 if response.status_code == requests.codes.ok:
-#                     messages.success(request, 'Canciones de playlist editadas correctamente.')
-#                     return redirect("lista_playlists")
-#                 else:
-#                     print(f"Error en playlist_editar_canciones - Status: {response.status_code}")
-#                     return tratar_errores(request, response.status_code)
-
-#             except HTTPError as http_err:
-#                 print(f"Error HTTP en playlist_editar_canciones: {http_err}")
-#                 if response.status_code == 400:
-#                     errores = response.json()
-#                     for error in errores:
-#                         formulario.add_error(error, errores[error])
-#                     return render(request, 'playlists/actualizar_canciones.html', {
-#                         "formulario": formulario,
-#                         "playlist": playlist,
-#                         'id': id
-#                     })
-#                 return tratar_errores(request, response.status_code)
-
-#             except Exception as err:
-#                 print(f"Error general en playlist_editar_canciones: {err}")
-#                 return mi_error_500(request)
-#         else:
-#             canciones_seleccionadas = [cancion.get('id') for cancion in playlist.get('canciones', [])]
-#             formulario = PlaylistActualizarCancionesForm(initial={
-#                 'canciones': canciones_seleccionadas
-#             })
-        
-#         return render(request, 'playlists/actualizar_canciones.html', {
-#             "formulario": formulario,
-#             "playlist": playlist,
-#             'id': id
-#         })
-#     except Exception as err:
-#         print(f"Error al obtener playlist para editar canciones: {err}")
-#         return mi_error_500(request)
-    
-
-# MÉTODOS ELIMINAR
-# def usuario_eliminar(request, usuario_id):
-#     if request.method == "POST":
-#         try:
-#             headers = crear_cabecera()
-#             response = requests.delete(
-#                 f'{settings.API_URL}usuarios/eliminar/{usuario_id}',
-#                 headers=headers,
-#             )
-#             if response.status_code == requests.codes.ok:
-#                 messages.success(request, 'Usuario eliminado correctamente.')
-#                 return redirect("lista_usuarios_completa")
-#             else:
-#                 print(f"Error en usuario_eliminar - Status: {response.status_code}")
-#                 return tratar_errores(request, response.status_code)
-
-#         except Exception as err:
-#             print(f"Error general en usuario_eliminar: {err}")
-#             return mi_error_500(request)
-#     else:
-#         try:
-#             usuario = helper.obtener_usuario(usuario_id)
-#             return render(request, 'usuarios/eliminar_confirmacion.html', {'usuario': usuario})
-#         except Exception as err:
-#             print(f"Error al obtener usuario para eliminar: {err}")
-#             return mi_error_500(request)
-
-# def album_eliminar(request, id):
-#     if request.method == "POST":
-#         try:
-#             headers = crear_cabecera()
-#             response = requests.delete(
-#                 f'{settings.API_URL}albumes/{id}/eliminar/',
-#                 headers=headers,
-#             )
-#             if response.status_code == requests.codes.ok:
-#                 messages.success(request, 'Album eliminado correctamente.')
-#                 return redirect("lista_albumes")
-#             else:
-#                 print(f"Error en album_eliminar - Status: {response.status_code}")
-#                 return tratar_errores(request, response.status_code)
-
-#         except Exception as err:
-#             print(f"Error general en album_eliminar: {err}")
-#             return mi_error_500(request)
-#     else:
-#         try:
-#             album = helper.obtener_album(id)
-#             return render(request, 'albums/eliminar_album.html', {'album': album})
-#         except Exception as err:
-#             print(f"Error al obtener album para eliminar: {err}")
-#             return mi_error_500(request)
-
-# def playlist_eliminar(request, id):
-#     if request.method == "POST":
-#         try:
-#             headers = crear_cabecera_contentType()
-#             response = requests.delete(
-#                 f'{settings.API_URL}playlists/{id}/eliminar/',
-#                 headers=headers,
-#             )
-#             if response.status_code == requests.codes.ok:
-#                 messages.success(request, 'Playlist eliminada correctamente.')
-#                 return redirect("lista_playlists")
-#             else:
-#                 print(f"Error en playlist_eliminar - Status: {response.status_code}")
-#                 return tratar_errores(request, response.status_code)
-
-#         except Exception as err:
-#             print(f"Error general en playlist_eliminar: {err}")
-#             return mi_error_500(request)
-#     else:
-#         try:
-#             playlist = helper.obtener_playlist(id)
-#             return render(request, 'playlists/eliminar_playlist.html', {'playlist': playlist})
-#         except Exception as err:
-#             print(f"Error al obtener playlist para eliminar: {err}")
-#             return mi_error_500(request)
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 def cancion_playlist_crear(request):
     if request.method == 'POST':
@@ -1890,6 +1263,122 @@ def detalle_album_editar(request, id):
 
     return render(request, 'detalles_album/detalle_album_actualizar.html', 
                 {"formulario": formulario, "id": id})
+
+
+
+
+def registrar_usuario(request):
+    if request.method == "POST":
+        try:
+            formulario = RegistroForm(request.POST)
+            if formulario.is_valid():
+                headers = {
+                    "Content-Type": "application/json"
+                }
+                
+           
+                data = {
+                    "username": formulario.cleaned_data['username'],
+                    "email": formulario.cleaned_data['email'],
+                    "password1": formulario.cleaned_data['password1'],
+                    "password2": formulario.cleaned_data['password2'],
+                    "rol": formulario.cleaned_data['rol']
+                }
+                
+             
+                response = requests.post(
+                    'http://127.0.0.1:8000/api/v1/registrar/usuario/',
+                    headers=headers,
+                    data=json.dumps(data)
+                )
+                
+       
+                if response.status_code == requests.codes.ok:
+                    return redirect("index")
+                else:
+                    print(response.status_code)
+                    response.raise_for_status()
+                    
+        except HTTPError as http_err:
+            print(f'Hubo un error en la petición: {http_err}')
+            if response.status_code == 400:
+                errores = response.json()
+                for error in errores:
+                    formulario.add_error(error, errores[error])
+            return render(request, 'registro.html', {"formulario": formulario})
+        
+        except Exception as err:
+            print(f'Ocurrió un error: {err}')
+            return render(request, 'registro.html', {"formulario": formulario})
+    else:
+        formulario = RegistroForm()
+    
+    return render(request, 'registro.html', {"formulario": formulario})
+
+
+def login_usuario(request):
+    if request.method == "POST":
+        formulario = LoginForm(request.POST)
+        try:
+            if formulario.is_valid():
+                # Imprimir información para debug
+                print(f"Iniciando login para usuario: {formulario.cleaned_data['usuario']}")
+                
+                try:
+                    # Obtener token de acceso
+                    token_acceso = helper.obtener_token_session(
+                        formulario.cleaned_data["usuario"],
+                        formulario.cleaned_data["password"]
+                    )
+                    
+                    print(f"Token obtenido: {token_acceso[:10]}...")
+                    
+                    # Guardar token en la sesión
+                    request.session["token"] = token_acceso
+                    
+                    # Obtener información del usuario con el token
+                    headers = {'Authorization': f'Bearer {token_acceso}'}
+                    
+                    # URL para obtener usuario
+                    url = f'{settings.API_URL}usuario/token/{token_acceso}'
+                    print(f"Haciendo petición a: {url}")
+                    
+                    response = requests.get(url, headers=headers)
+                    
+                    print(f"Código de respuesta: {response.status_code}")
+                    print(f"Contenido: {response.text[:100]}...")
+                    
+                    if response.status_code == 200:
+                        # Intentar parsear JSON
+                        try:
+                            usuario = response.json()
+                            # Guardar datos de usuario en la sesión
+                            request.session["usuario"] = usuario
+                            
+                            messages.success(request, f'Bienvenido, {usuario.get("nombre_usuario", "")}!')
+                            return redirect("index")
+                        except json.JSONDecodeError as json_error:
+                            print(f"Error al decodificar JSON: {json_error}")
+                            messages.error(request, f"Error al procesar respuesta del servidor: {str(json_error)}")
+                    else:
+                        print(f"Error en la respuesta: {response.text}")
+                        messages.error(request, f"Error del servidor: Código {response.status_code}")
+                
+                except Exception as token_error:
+                    print(f"Error al obtener token: {token_error}")
+                    messages.error(request, f"Error de autenticación: {str(token_error)}")
+                    formulario.add_error(None, f"Error de autenticación: {str(token_error)}")
+                    
+        except Exception as excepcion:
+            print(f'Hubo un error general: {excepcion}')
+            messages.error(request, f'Error: {str(excepcion)}')
+            
+        return render(request, 'login.html', {"formulario": formulario})
+    else:
+        formulario = LoginForm()
+        return render(request, 'login.html', {"formulario": formulario})
+
+
 
 
 
