@@ -5,10 +5,9 @@ import json
 from django.contrib import messages
 
 
-# def crear_cabecera():
-#     return {'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}'}
 
 class helper:
+    
     
     def obtener_token_session(usuario, password):
         token_url = f'{settings.API_BASE_URL}oauth2/token/'
@@ -18,8 +17,8 @@ class helper:
             'grant_type': 'password',
             'username': usuario,
             'password': password,
-            'client_id': 'mi_aplicacion',  # Ajusta según tu configuración
-            'client_secret': 'mi_clave_secreta',  # Ajusta según tu configuración
+            'client_id': 'mi_aplicacion',  
+            'client_secret': 'mi_clave_secreta', 
         }
         
         print(f"Datos para obtener token: {json.dumps(data)}")
@@ -37,7 +36,7 @@ class helper:
                 else:
                     raise Exception("No se recibió un token de acceso en la respuesta")
             else:
-                # Intentar obtener mensaje de error
+            
                 try:
                     respuesta = response.json()
                     error_msg = respuesta.get("error_description", "Error desconocido")
@@ -52,19 +51,46 @@ class helper:
             raise Exception(f"Error al procesar respuesta: formato inválido")
         except Exception as e:
             raise Exception(f"Error inesperado: {str(e)}")
-        
+    
+    
+    def crear_cabecera(request):
+     
+        # Obtener token de la sesión si existe
+        if request and 'token' in request.session:
+            return {'Authorization': f'Bearer {request.session["token"]}'}
+        else:
+            # Fallback a un token predeterminado si el usuario no está logueado
+            return {'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}'}
+    
+    
+    def crear_cabecera_contentType(request):
+      
+        # Obtener token de la sesión si existe
+        if request and 'token' in request.session:
+            return {
+                'Authorization': f'Bearer {request.session["token"]}',
+                'Content-Type': 'application/json'
+            }
+        else:
+            # Fallback a un token predeterminado si el usuario no está logueado
+            return {
+                'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}',
+                'Content-Type': 'application/json'
+            }
 
-    def obtener_usuario(usuario_id):
-        headers = {'Authorization': f'Token {settings.AUTH_TOKEN}'} 
+    
+    def obtener_usuario(request, usuario_id):
+        headers = helper.crear_cabecera(request)
         response = requests.get(f'{settings.API_URL}usuarios/{str(usuario_id)}', headers=headers)
         usuario = response.json()
         return usuario
 
      
-    def validar_nombre_usuario_existe(nombre_usuario):
-        """Valida si un nombre de usuario ya existe"""
+    
+    def validar_nombre_usuario_existe(request, nombre_usuario):
+    
         try:
-            headers = {'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}'}
+            headers = helper.crear_cabecera(request)
             response = requests.get(
                 f'{settings.API_URL}usuarios/validar-nombre/{nombre_usuario}',
                 headers=headers
@@ -74,10 +100,11 @@ class helper:
             return False
 
     
-    def validar_email_existe(email):
-        """Valida si un email ya existe"""
+    
+    def validar_email_existe(request, email):
+    
         try:
-            headers = {'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}'}
+            headers = helper.crear_cabecera(request)
             response = requests.get(
                 f'{settings.API_URL}usuarios/validar-email/{email}',
                 headers=headers
@@ -87,10 +114,11 @@ class helper:
             return False
 
     
-    def validar_like_existe(usuario_id, cancion_id):
-        """Valida si ya existe un like para una canción de un usuario"""
+    
+    def validar_like_existe(request, usuario_id, cancion_id):
+      
         try:
-            headers = {'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}'}
+            headers = helper.crear_cabecera(request)
             response = requests.get(
                 f'{settings.API_URL}likes/validar/{usuario_id}/{cancion_id}',
                 headers=headers
@@ -100,8 +128,9 @@ class helper:
             return False
     
 
-    def obtener_albumes_select():
-        headers = {'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}'}
+    
+    def obtener_albumes_select(request=None):
+        headers = helper.crear_cabecera(request)
         response = requests.get(f'{settings.API_URL}albumes/', headers=headers)
         albumes = response.json()
         
@@ -111,8 +140,9 @@ class helper:
         return lista_albumes
     
 
-    def obtener_usuarios_select():
-        headers = {'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}'}
+    
+    def obtener_usuarios_select(request=None):
+        headers = helper.crear_cabecera(request)
         response = requests.get(f'{settings.API_URL}usuarios/', headers=headers)
         usuarios = response.json()
         
@@ -121,26 +151,24 @@ class helper:
             lista_usuarios.append((usuario["id"], usuario["nombre_usuario"]))
         return lista_usuarios
     
-    def obtener_album(id):
-        headers = {'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}'}
+    
+    def obtener_album(request, id):
+        headers = helper.crear_cabecera(request)
         response = requests.get(f'{settings.API_URL}albumes/{id}/', headers=headers)
         if response.status_code == 200:
             return response.json()
         raise Exception(f"Error al obtener álbum: {response.text}")
     
- 
-
-    def obtener_detalle_album(id):
+    
+    def obtener_detalle_album(request, id):
         print("Iniciando obtener_detalle_album")
-        headers = {'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}'}
-        
-     
+        headers = helper.crear_cabecera(request)
         response = requests.get(f'{settings.API_URL}albumes/detalles/{id}', headers=headers)
-      
         return response.json()
     
-    def obtener_canciones_select():
-        headers = {'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}'} 
+    
+    def obtener_canciones_select(request=None):
+        headers = helper.crear_cabecera(request) 
         response = requests.get(f'{settings.API_URL}canciones', headers=headers)
         canciones = response.json()
         
@@ -149,13 +177,15 @@ class helper:
             lista_canciones.append((cancion["id"], f"{cancion['titulo']} - {cancion['artista']}"))
         return lista_canciones
 
-    def obtener_playlist(id):
-        headers = {'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}'} 
+    
+    def obtener_playlist(request, id):
+        headers = helper.crear_cabecera(request)
         response = requests.get(f'{settings.API_URL}playlists/{id}', headers=headers)
         return response.json()
 
-    def obtener_playlists_select():
-        headers = {'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}'}
+    
+    def obtener_playlists_select(request=None):
+        headers = helper.crear_cabecera(request)
         response = requests.get(f'{settings.API_URL}playlists/', headers=headers)
         playlists = response.json()
         
@@ -165,21 +195,15 @@ class helper:
         return lista_playlists
 
 
-    def obtener_canciones_playlist(playlist_id):
-        headers = {'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}'}
+    
+    def obtener_canciones_playlist(request, playlist_id):
+        headers = helper.crear_cabecera(request)
         response = requests.get(f'{settings.API_URL}playlists/{playlist_id}/', headers=headers)
         playlist = response.json()
         return [cancion.get(id) for cancion in playlist.get('canciones', [])]
     
-
-    def crear_cabecera_contentType():
-        return {
-            'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}',
-            'Content-Type': 'application/json'
-        }
-
+    
     def procesar_imagen(imagen):
-     
         if not imagen:
             return None
         with imagen.open('rb') as file:
@@ -187,30 +211,52 @@ class helper:
         encoded = base64.b64encode(contenido).decode('utf-8')
         return f"data:{imagen.content_type};base64,{encoded}"
 
+    
     def manejar_respuesta_api(response, mensaje_exito=None, request=None):
-     
         if response.status_code in [200, 201]:
             if mensaje_exito and request:
                 messages.success(request, mensaje_exito)
             return True, None
         return False, response.status_code
 
+    
     def manejar_errores_formulario(response, formulario):
-      
         if response.status_code == 400:
             errores = response.json()
             for campo, mensaje in errores.items():
                 formulario.add_error(campo, mensaje)
         return formulario
 
-    def realizar_peticion_crear(url, datos, files=None):
+    
+    def realizar_peticion_get(request, url, params=None):
+        """
+        Realiza una petición GET a la API usando el token del usuario logueado
+        """
+        headers = helper.crear_cabecera(request)
         try:
-            headers = helper.crear_cabecera_contentType()
+            response = requests.get(
+                f'{settings.API_URL}{url}',
+                headers=headers,
+                params=params
+            )
+            return response
+        except Exception as e:
+            print(f"Error en realizar_peticion_get: {e}")
+            raise
+
+    
+    def realizar_peticion_crear(request, url, datos, files=None):
+        try:
+            headers = helper.crear_cabecera_contentType(request)
             
-           
             print(f"URL: {settings.API_URL}{url}")
             print(f"Headers: {headers}")
             print(f"Datos a enviar: {json.dumps(datos)[:500]}")  
+            
+            if files:
+                for key, file in files.items():
+                    if file:
+                        datos[key] = helper.procesar_imagen(file)
             
             response = requests.post(
                 f'{settings.API_URL}{url}',
@@ -230,10 +276,9 @@ class helper:
             print(f"Error en realizar_peticion_crear: {e}")
             raise
     
-
-    def realizar_peticion_actualizar(url, datos, files=None, method='PUT'):
-        
-        headers = helper.crear_cabecera_contentType()
+    
+    def realizar_peticion_actualizar(request, url, datos, files=None, method='PUT'):
+        headers = helper.crear_cabecera_contentType(request)
         
         if files:
             for key, file in files.items():
@@ -249,10 +294,66 @@ class helper:
             data=json.dumps(datos)
         )
 
-    def realizar_peticion_eliminar(url):
-   
-        headers = helper.crear_cabecera_contentType()
+    
+    def realizar_peticion_eliminar(request, url):
+        headers = helper.crear_cabecera_contentType(request)
         return requests.delete(
             f'{settings.API_URL}{url}',
             headers=headers
         )
+    
+    def dar_like_cancion(request, cancion_id):
+ 
+        headers = helper.crear_cabecera_contentType(request)
+        datos = {
+            'cancion': cancion_id
+        }
+        
+        response = requests.post(
+            f'{settings.API_URL}likes/like/',
+            headers=headers,
+            data=json.dumps(datos)
+        )
+        return response
+
+    def quitar_like_cancion(request, cancion_id):
+    
+        headers = helper.crear_cabecera_contentType(request)
+        datos = {
+            'cancion': cancion_id
+        }
+        
+        response = requests.post(
+            f'{settings.API_URL}likes/unlike/',
+            headers=headers,
+            data=json.dumps(datos)
+        )
+        return response
+    
+    def seguir_usuario(request, usuario_id):
+ 
+        headers = helper.crear_cabecera_contentType(request)
+        datos = {
+            'usuario_id': usuario_id
+        }
+        
+        response = requests.post(
+            f'{settings.API_URL}usuarios/seguir/',
+            headers=headers,
+            data=json.dumps(datos)
+        )
+        return response
+
+    def dejar_seguir_usuario(request, usuario_id):
+        """Envía una petición POST para dejar de seguir a un usuario"""
+        headers = helper.crear_cabecera_contentType(request)
+        datos = {
+            'usuario_id': usuario_id
+        }
+        
+        response = requests.post(
+            f'{settings.API_URL}usuarios/dejar-seguir/',
+            headers=headers,
+            data=json.dumps(datos)
+        )
+        return response

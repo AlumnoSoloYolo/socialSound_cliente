@@ -1,0 +1,67 @@
+{% extends 'principal.html' %}
+
+{% block title %}Perfil de {{ usuario.nombre_usuario }}{% endblock %}
+
+{% block contenido %}
+<div class="container mt-4">
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <div class="row">
+        <!-- Información del perfil -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3>{{ usuario.nombre_usuario }}</h3>
+                </div>
+                <div class="card-body">
+                    {% if usuario.foto_perfil_url %}
+                        <img src="{{ usuario.foto_perfil_url }}" alt="{{ usuario.nombre_usuario }}" class="img-fluid rounded-circle mb-3" style="max-width: 150px;">
+                    {% else %}
+                        <div class="text-center p-3 bg-light mb-3">
+                            <i class="fa fa-user fa-5x"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <p><strong>Email:</strong> {{ usuario.email }}</p>
+                    
+                    {% if usuario.bio %}
+                        <p><strong>Biografía:</strong> {{ usuario.bio }}</p>
+                    {% endif %}
+                    
+                    {% if usuario.ciudad %}
+                        <p><strong>Ciudad:</strong> {{ usuario.ciudad }}</p>
+                    {% endif %}
+                    
+                    <p><strong>Fecha de registro:</strong> {{ usuario.date_joined }}</p>
+                    <p><strong>Rol:</strong> {{ usuario.rol_display }}</p>
+                    
+                    <p><strong>Seguidores:</strong> {{ usuario.seguidores_count }}</p>
+                    <p><strong>Siguiendo:</strong> {{ usuario.seguidos_count }}</p>
+                    
+                    {% if es_propio %}
+                        <div class="mt-3">
+                            <a href="{% url 'usuario_editar' usuario.id %}" class="btn btn-primary">Editar perfil</a>
+                        </div>
+                    {% else %}
+                        <!-- Aquí podrías añadir un botón para seguir/dejar de seguir al usuario -->
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Álbumes del usuario -->
+        {% with inner_include=True %}
+            {% include 'usuarios/albumes_usuario.html' %}
+        {% endwith %}
+          
+    </div>
+</div>
+{% endblock %}

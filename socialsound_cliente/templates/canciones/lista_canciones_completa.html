@@ -6,6 +6,48 @@
 <link rel="stylesheet" href="{% static 'css/reproductor.css' %}">
 
 <style>
+
+    .like-btn-container {
+        position: relative;
+    }
+    
+    .like-btn {
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        padding: 0.25rem 0.75rem;
+    }
+    
+    .like-btn:hover {
+        transform: scale(1.05);
+    }
+    
+    .like-btn .fa-heart {
+        margin-right: 5px;
+    }
+    
+    /* Animación para cuando se da like */
+    @keyframes heartBeat {
+        0% {
+            transform: scale(1);
+        }
+        14% {
+            transform: scale(1.3);
+        }
+        28% {
+            transform: scale(1);
+        }
+        42% {
+            transform: scale(1.3);
+        }
+        70% {
+            transform: scale(1);
+        }
+    }
+    
+    .like-btn-animate {
+        animation: heartBeat 1s;
+    }
+
     @keyframes scanline {
         0% { transform: translateY(0); }
         100% { transform: translateY(100%); }
@@ -215,6 +257,25 @@
                                         {{ cancion.num_likes }} likes
                                     </small>
                                 </div>
+                                <div class="like-btn-container">
+                                    {% if cancion.is_liked_by_current_user %}
+                                        <form method="post" action="{% url 'quitar_like' cancion.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-danger like-btn">
+                                                <i class="fas fa-heart"></i> 
+                                                <span class="likes-count">{{ cancion.likes_count }}</span>
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <form method="post" action="{% url 'dar_like' cancion.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger like-btn">
+                                                <i class="far fa-heart"></i> 
+                                                <span class="likes-count">{{ cancion.likes_count }}</span>
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
                                 <div class="cyber-audio-player">
                                     <audio id="audio-{{ cancion.id }}" src="{{ cancion.archivo_audio_url }}" preload="metadata"></audio>
                                     
@@ -322,5 +383,6 @@
 {% endblock %}
 
 {% block extra_script %}
+
 <script src="{% static 'js/reproductor.js' %}"></script>
 {% endblock %}

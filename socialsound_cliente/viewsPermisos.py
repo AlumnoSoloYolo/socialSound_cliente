@@ -23,15 +23,11 @@ def formato_respuesta(response):
 
 
 def index(request):
-    if 'token' not in request.session:
-        return redirect('registrar')
     return render(request, "index.html");
-
-
 
 def lista_playlists_api(request): 
   
-    headers = helper.crear_cabecera(request)
+    headers = {'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}'}
     response = requests.get(f"{settings.API_URL}playlists", headers=headers)
     playlists = formato_respuesta(response)
     # print(f'{playlists}')
@@ -52,7 +48,7 @@ def lista_playlists_api(request):
 
 def lista_albumes_api(request):
     try:
-        headers = helper.crear_cabecera(request)
+        headers = {'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}'}
         response = requests.get(f"{settings.API_URL}albumes/", headers=headers)
         if response.status_code == 200:
             albumes = response.json()
@@ -80,7 +76,7 @@ from urllib.parse import urlparse
 
 
 def lista_albumes_usuario_api(request, nombre_usuario):
-    headers = helper.crear_cabecera(request)
+    headers = {'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}'}
     response = requests.get(f"{settings.API_URL}{nombre_usuario}/albumes", headers=headers)
     albumes = formato_respuesta(response)
     
@@ -101,55 +97,36 @@ def lista_albumes_usuario_api(request, nombre_usuario):
 
 
 def lista_usuarios_completa_api(request):
-    headers = helper.crear_cabecera(request)
+    headers = {'Authorization': f'Bearer {settings.OAUTH_TOKENS[2]}'}
     url = f"{settings.API_URL}usuarios/lista_usuarios_completa/"    
     response = requests.get(url, headers=headers)
   
     if response.status_code == 200:
         usuarios = formato_respuesta(response)
-        
-      
-        if usuarios and len(usuarios) > 0:
-            print("Estructura de primer usuario recibido:", json.dumps(usuarios[0], indent=2))
-        
+
         for usuario in usuarios:
             if 'foto_perfil' in usuario:
                 usuario['foto_perfil_url'] = f"{settings.API_MEDIA_URL}{urlparse(usuario['foto_perfil']).path}"
             
-       
-            if 'seguidores' in usuario and usuario['seguidores']: 
+            if 'seguidores' in usuario: 
                 for seguidor in usuario['seguidores']:
-                    if 'seguidor' in seguidor and 'foto_perfil' in seguidor['seguidor']:
-                        seguidor['seguidor']['foto_perfil_url'] = f"{settings.API_MEDIA_URL}{urlparse(seguidor['seguidor']['foto_perfil'])}"
+                    seguidor['seguidor']['foto_perfil_url'] = f"{settings.API_MEDIA_URL}{urlparse(seguidor['seguidor']['foto_perfil'])}"
 
-          
-            if 'seguidos' in usuario and usuario['seguidos']: 
+            if 'seguidos' in usuario: 
                 for seguido in usuario['seguidos']:
-                    if 'seguido' in seguido and 'foto_perfil' in seguido['seguido']:
-                        seguido['seguido']['foto_perfil_url'] = f"{settings.API_MEDIA_URL}{urlparse(seguido['seguido']['foto_perfil'])}"
-            
-         
-            if 'seguidores' in usuario and usuario['seguidores'] and request.session.get('usuario'):
-                usuario_actual_id = request.session['usuario'].get('id')
-                usuario['is_followed_by_current_user'] = any(
-                    str(seguidor.get('seguidor', {}).get('id')) == str(usuario_actual_id)
-                    for seguidor in usuario['seguidores']
-                )
-            else:
-                usuario['is_followed_by_current_user'] = False
+                    seguido['seguido']['foto_perfil_url'] = f"{settings.API_MEDIA_URL}{urlparse(seguido['seguido']['foto_perfil'])}"
 
         return render(request, 'usuarios/lista_usuarios_completa.html', {
             'usuarios_mostrar': usuarios
         })
     else:
-        print(f"Error en solicitud API: {response.status_code} - {response.text}")
         return render(request, 'usuarios/lista_usuarios_completa.html', {
             'error': f"Error {response.status_code}: {response.text}"
         })
     
 
 def lista_canciones_api(request):
-    headers = helper.crear_cabecera(request)
+    headers = {'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}'}
     url = f"{settings.API_URL}canciones/lista_canciones_completa/"    
     response = requests.get(url, headers=headers)
         
@@ -176,7 +153,7 @@ def lista_canciones_api(request):
 
 
 def canciones_por_genero_api(request):
-    headers = helper.crear_cabecera(request)
+    headers = {'Authorization': f'Token {settings.AUTH_TOKEN}'}
     url = f"{settings.API_URL}canciones/generos/"
     
     response = requests.get(url, headers=headers)
@@ -205,14 +182,14 @@ def canciones_por_genero_api(request):
 
 # BÚSQUEDAS AVANZADAS
 
-# def crear_cabecera():
-#     return {'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}'}
+def crear_cabecera():
+    return {'Authorization': f'Bearer {settings.OAUTH_TOKENS[1]}'}
 
 
 def busqueda_usuarios_api(request):
     formulario = BusquedaUsuarioForm(request.GET)
     if formulario.is_valid():  
-        headers = helper.crear_cabecera(request)    
+        headers = crear_cabecera()     
         response = requests.get(
             f"{settings.API_URL}usuarios/busqueda_simple",
             headers=headers,
@@ -221,8 +198,7 @@ def busqueda_usuarios_api(request):
         usuarios = formato_respuesta(response)
 
         for usuario in usuarios:
-            if 'foto_perfil' in usuario:
-                usuario['foto_perfil_url'] = f"{settings.API_MEDIA_URL}{usuario['foto_perfil']}"
+            usuario['foto_perfil_url'] = f"{settings.API_MEDIA_URL}{usuario['foto_perfil']}"
 
         return render(request, "usuarios/lista_usuarios_completa.html", {"usuarios_mostrar": usuarios})
     
@@ -238,7 +214,7 @@ def usuario_busqueda_avanzada_api(request):
         formulario = BusquedaAvanzadaUsuarioForm(request.GET)
         
         try:
-            headers = helper.crear_cabecera(request)
+            headers = crear_cabecera()
             response = requests.get(
                 f"{settings.API_URL}usuarios/busqueda_avanzada/",
                 headers=headers,
@@ -291,13 +267,13 @@ def album_busqueda_avanzada_api(request):
 
         
         try:
-            headers = helper.crear_cabecera(request)
+            headers = crear_cabecera()
             response = requests.get(
                 f"{settings.API_URL}albumes/busqueda_avanzada/",
                 headers=headers,
                 params=formulario.data
             )
-            print(f"Status: {response.status_code}")  
+            print(f"Status: {response.status_code}")  # Añadir debug
             print(f"Response: {response.text}")   
             
             if response.status_code == requests.codes.ok:
@@ -344,7 +320,7 @@ def cancion_busqueda_avanzada_api(request):
         formulario = BusquedaAvanzadaCancionForm(request.GET)
         
         try:
-            headers = helper.crear_cabecera(request)
+            headers = crear_cabecera()
             response = requests.get(
                 f"{settings.API_URL}canciones/busqueda_avanzada/",
                 headers=headers,
@@ -386,7 +362,7 @@ def playlist_busqueda_avanzada_api(request):
         formulario = BusquedaAvanzadaPlaylistForm(request.GET)
         
         try:
-            headers = helper.crear_cabecera(request)
+            headers = crear_cabecera()
             response = requests.get(
                 f"{settings.API_URL}playlists/busqueda_avanzada/",
                 headers=headers,
@@ -485,9 +461,9 @@ def usuario_crear(request):
 
 def usuario_editar(request, id):
 
-    formulario = UsuarioUpdateForm(request.POST, request.FILES, initial={'id': id})
+    formulario = None 
     if request.method == "POST":
-       
+        formulario = UsuarioUpdateForm(request.POST, request.FILES, initial={'id': id})
         if formulario.is_valid():
            
             datos = formulario.cleaned_data.copy()
@@ -1333,7 +1309,7 @@ def registrar_usuario(request):
                 
        
                 if response.status_code == requests.codes.ok:
-                    return redirect("login")
+                    return redirect("index")
                 else:
                     print(response.status_code)
                     response.raise_for_status()
@@ -1360,11 +1336,11 @@ def login_usuario(request):
         formulario = LoginForm(request.POST)
         try:
             if formulario.is_valid():
-                
+                # Imprimir información para debug
                 print(f"Iniciando login para usuario: {formulario.cleaned_data['usuario']}")
                 
                 try:
-                    # Obtenenemos token de acceso
+                    # Obtener token de acceso
                     token_acceso = helper.obtener_token_session(
                         formulario.cleaned_data["usuario"],
                         formulario.cleaned_data["password"]
@@ -1372,13 +1348,13 @@ def login_usuario(request):
                     
                     print(f"Token obtenido: {token_acceso[:10]}...")
                     
-                    # Guardamos token en la sesión
+                    # Guardar token en la sesión
                     request.session["token"] = token_acceso
                     
-                    # Obtenenemos información del usuario con el token
+                    # Obtener información del usuario con el token
                     headers = {'Authorization': f'Bearer {token_acceso}'}
                     
-                 
+                    # URL para obtener usuario
                     url = f'{settings.API_URL}usuario/token/{token_acceso}'
                     print(f"Haciendo petición a: {url}")
                     
@@ -1388,10 +1364,10 @@ def login_usuario(request):
                     print(f"Contenido: {response.text[:100]}...")
                     
                     if response.status_code == 200:
-                    
+                        # Intentar parsear JSON
                         try:
                             usuario = response.json()
-                        
+                            # Guardar datos de usuario en la sesión
                             request.session["usuario"] = usuario
                             
                             messages.success(request, f'Bienvenido, {usuario.get("nombre_usuario", "")}!')
@@ -1421,230 +1397,6 @@ def login_usuario(request):
 def logout(request):
     del request.session['token']
     return redirect('login')
-
-
-
-def perfil_usuario(request, usuario_id=None):
-    try:
-        # Verificamos si el usuario está logueado
-        if 'token' not in request.session:
-            messages.error(request, 'Debes iniciar sesión para ver perfiles')
-            return redirect('login')
-        
-        # Si no hay usuario_id, usamos el del usuario logueado
-        if not usuario_id and 'usuario' in request.session:
-            usuario_id = request.session['usuario'].get('id')
-            
-        # Primera petición GET: obtiene los datos del perfil
-        headers = helper.crear_cabecera(request)
-        response = requests.get(f'{settings.API_URL}usuarios/{usuario_id}', headers=headers)
-        
-        if response.status_code != 200:
-            messages.error(request, f'Error al obtener el perfil: {response.text}')
-            return redirect('index')
-            
-        usuario = response.json()
-        
-        # Procesar la URL de la foto de perfil
-        if 'foto_perfil' in usuario:
-            usuario['foto_perfil_url'] = f"{settings.API_MEDIA_URL}{urlparse(usuario['foto_perfil']).path}"
-        
-        # Determinamos si el perfil es del propio usuario o de otro
-        es_propio = str(usuario_id) == str(request.session['usuario'].get('id'))
-        
-        # Segunda petición GET: obtiene los álbumes del usuario
-        nombre_usuario = usuario.get('nombre_usuario')
-        albumes_response = requests.get(f"{settings.API_URL}{nombre_usuario}/albumes", headers=headers)
-        
-        albumes = []
-        if albumes_response.status_code == 200:
-            albumes = formato_respuesta(albumes_response)
-            
-            for album in albumes:
-                album['portada_url'] = f"{settings.API_MEDIA_URL}{urlparse(album['portada']).path}"
-                
-                if 'canciones' in album:
-                    for cancion in album['canciones']:
-                        if 'portada' in cancion:
-                            cancion['portada_url'] = f"{settings.API_MEDIA_URL}{urlparse(cancion['portada']).path}"
-                        if 'archivo_audio' in cancion:
-                            cancion['archivo_audio_url'] = f"{settings.API_MEDIA_URL}{urlparse(cancion['archivo_audio']).path}"
-        
-        return render(request, 'usuarios/perfil.html', {
-            'usuario': usuario,
-            'es_propio': es_propio,
-            'albumes': albumes,
-            'nombre_usuario': nombre_usuario
-        })
-    
-    except Exception as e:
-        messages.error(request, f'Error al cargar el perfil: {str(e)}')
-        return redirect('index')
-    
-
-
-def albumes_usuario(request, nombre_usuario):
-   
-    if 'token' not in request.session:
-        messages.error(request, 'Debes iniciar sesión para ver álbumes')
-        return redirect('login')
-    
-    headers = helper.crear_cabecera(request)
-    response = requests.get(f"{settings.API_URL}{nombre_usuario}/albumes", headers=headers)
-    
-    if response.status_code != 200:
-        messages.error(request, f'Error al obtener álbumes: {response.text}')
-        return redirect('index')
-        
-    albumes = formato_respuesta(response)
-    
-    for album in albumes:
-        album['portada_url'] = f"{settings.API_MEDIA_URL}{urlparse(album['portada'])}"
-        
-        if 'canciones' in album:
-            for cancion in album['canciones']:
-                if 'portada' in cancion:
-                    cancion['portada_url'] = f"{settings.API_MEDIA_URL}{urlparse(cancion['portada'])}"
-                if 'archivo_audio' in cancion:
-                    cancion['archivo_audio_url'] = f"{settings.API_MEDIA_URL}{urlparse(cancion['archivo_audio'])}"
-
-    # Determinamos si los álbumes son del propio usuario o de otro
-    es_propio = False
-    if 'usuario' in request.session and 'nombre_usuario' in request.session['usuario']:
-        es_propio = nombre_usuario == request.session['usuario'].get('nombre_usuario')
-
-    return render(request, 'usuarios/lista_albumes_usuario.html', {
-        'albumes_mostrar': albumes,
-        'nombre_usuario': nombre_usuario,
-        'es_propio': es_propio
-    })  
-
-
-def dar_like(request, cancion_id):
- 
-    if 'token' not in request.session:
-        messages.error(request, 'Debes iniciar sesión para dar like')
-        return redirect('login')
-    
-    try:
-        response = helper.dar_like_cancion(request, cancion_id)
-        
-        if response.status_code in [200, 201]:
-            messages.success(request, '¡Te gusta esta canción!')
-        else:
-            error_msg = "Error al dar like"
-            try:
-                error_data = response.json()
-                if 'error' in error_data:
-                    error_msg = error_data['error']
-                elif 'message' in error_data:
-                    error_msg = error_data['message']
-            except:
-                pass
-            messages.error(request, error_msg)
-    except Exception as e:
-        messages.error(request, f'Error: {str(e)}')
-    
-   
-    referer = request.META.get('HTTP_REFERER')
-    if referer:
-        return redirect(referer)
-    return redirect('lista_canciones')
-
-def quitar_like(request, cancion_id):
-   
-    
-    if 'token' not in request.session:
-        messages.error(request, 'Debes iniciar sesión para quitar like')
-        return redirect('login')
-    
-    try:
-        response = helper.quitar_like_cancion(request, cancion_id)
-        
-        if response.status_code == 200:
-            messages.success(request, 'Has quitado tu like de esta canción')
-        else:
-            error_msg = "Error al quitar like"
-            try:
-                error_data = response.json()
-                if 'error' in error_data:
-                    error_msg = error_data['error']
-                elif 'message' in error_data:
-                    error_msg = error_data['message']
-            except:
-                pass
-            messages.error(request, error_msg)
-    except Exception as e:
-        messages.error(request, f'Error: {str(e)}')
-    
-    # Redireccionar de vuelta a la página anterior
-    referer = request.META.get('HTTP_REFERER')
-    if referer:
-        return redirect(referer)
-    return redirect('lista_canciones')
-
-
-def seguir(request, usuario_id):
-
-    if 'token' not in request.session:
-        messages.error(request, 'Debes iniciar sesión para seguir a otros usuarios')
-        return redirect('login')
-    
-    try:
-        response = helper.seguir_usuario(request, usuario_id)
-        
-        if response.status_code in [200, 201]:
-            messages.success(request, 'Ahora sigues a este usuario')
-        else:
-            error_msg = "Error al seguir usuario"
-            try:
-                error_data = response.json()
-                if 'error' in error_data:
-                    error_msg = error_data['error']
-                elif 'message' in error_data:
-                    error_msg = error_data['message']
-            except:
-                pass
-            messages.error(request, error_msg)
-    except Exception as e:
-        messages.error(request, f'Error: {str(e)}')
-    
- 
-    referer = request.META.get('HTTP_REFERER')
-    if referer:
-        return redirect(referer)
-    return redirect('perfil_usuario_detalle', usuario_id=usuario_id)
-
-def dejar_seguir(request, usuario_id):
-    
-    if 'token' not in request.session:
-        messages.error(request, 'Debes iniciar sesión para dejar de seguir a usuarios')
-        return redirect('login')
-    
-    try:
-        response = helper.dejar_seguir_usuario(request, usuario_id)
-        
-        if response.status_code == 200:
-            messages.success(request, 'Has dejado de seguir a este usuario')
-        else:
-            error_msg = "Error al dejar de seguir"
-            try:
-                error_data = response.json()
-                if 'error' in error_data:
-                    error_msg = error_data['error']
-                elif 'message' in error_data:
-                    error_msg = error_data['message']
-            except:
-                pass
-            messages.error(request, error_msg)
-    except Exception as e:
-        messages.error(request, f'Error: {str(e)}')
-    
-   
-    referer = request.META.get('HTTP_REFERER')
-    if referer:
-        return redirect(referer)
-    return redirect('perfil_usuario_detalle', usuario_id=usuario_id)
 
 
 

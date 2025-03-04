@@ -270,6 +270,25 @@
                                         {% endif %}
                                     </div>
                                 </div>
+                                {% if request.session.usuario.id != usuario.id %}
+                                <div class="follow-container">
+                                    {% if usuario.is_followed_by_current_user %}
+                                        <form method="post" action="{% url 'dejar_seguir_usuario' usuario.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                                <i class="fas fa-user-minus"></i> Dejar de seguir
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <form method="post" action="{% url 'seguir_usuario' usuario.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-user-plus"></i> Seguir
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
 
                                 <div class="row-md-12">
                                     <div class="following">

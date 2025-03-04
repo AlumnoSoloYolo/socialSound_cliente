@@ -32,12 +32,143 @@
   }
   
   .search-btn:hover {
-    background:black;
+    background: black;
     color: #fff;
   }
-  </style>
+  
+  /* Estilos para el usuario logueado */
+  .user-dropdown {
+    margin-left: 20px;
+  }
+  
+  .user-dropdown .dropdown-toggle {
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: background-color 0.3s ease;
+  }
+  
+  .user-dropdown .dropdown-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+    border: 2px solid #ffc107;
+  }
+  
+  .user-avatar-placeholder {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #ffc107;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    font-weight: bold;
+  }
+  
+  .user-name {
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #fff;
+    margin-right: 5px;
+  }
+  
+  .auth-buttons {
+    display: flex;
+    margin-left: auto;
+  }
+  
+  .auth-buttons a {
+    margin-left: 10px;
+    color: #fff;
+    padding: 7px 15px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .login-btn {
+    background-color: transparent;
+    border: 1px solid #ffc107;
+  }
+  
+  .login-btn:hover {
+    background-color: rgba(255, 193, 7, 0.2);
+  }
+  
+  .register-btn {
+    background-color: #ffc107;
+    color: #000 !important;
+  }
+  
+  .register-btn:hover {
+    background-color: #e0a800;
+  }
+  
+  .user-dropdown .dropdown-menu {
+    min-width: 200px;
+    padding: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .dropdown-user-info {
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  .user-dropdown .dropdown-item {
+    padding: 12px 20px;
+    transition: all 0.2s ease;
+  }
+  
+  .user-dropdown .dropdown-item i {
+    margin-right: 10px;
+    color: #6c757d;
+    width: 20px;
+    text-align: center;
+  }
+  
+  .user-dropdown .dropdown-item:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .user-dropdown .dropdown-item.logout {
+    color: #dc3545;
+  }
+  
+  .user-dropdown .dropdown-item.logout i {
+    color: #dc3545;
+  }
+
+  /* Estilos para la barra de navegación no autenticada */
+  .navbar-not-logged {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 20px;
+  }
+</style>
 {% endblock %}
 
+{% if request.session.token %}
+<!-- Barra de navegación para usuario logueado -->
 <nav class="navbar navbar-expand-lg">
   <div class="container-fluid">
     <div class="d-flex align-items-center justify-content-between w-100">
@@ -97,7 +228,45 @@
             <li><a class="dropdown-item" href="{% url 'lista_playlists' %}">Ver playlists</a></li>
           </ul>
         </li>
+        
+        <!-- Usuario logueado -->
+        <li class="nav-item dropdown user-dropdown">
+          <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            {% if request.session.usuario.foto_perfil %}
+              <img src="{{ settings.API_MEDIA_URL }}{{ request.session.usuario.foto_perfil }}" class="user-avatar" alt="{{ request.session.usuario.nombre_usuario }}">
+            {% else %}
+              <div class="user-avatar-placeholder">
+                {{ request.session.usuario.nombre_usuario|first|upper }}
+              </div>
+            {% endif %}
+            <span class="user-name">{{ request.session.usuario.nombre_usuario }}</span>
+            <i class="fas fa-chevron-down"></i>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li class="dropdown-user-info">
+              <h6 class="mb-0">{{ request.session.usuario.nombre_usuario }}</h6>
+              <small class="text-muted">{{ request.session.usuario.email }}</small>
+            </li>
+            <li><a class="dropdown-item" href="{% url 'perfil_usuario' %}"><i class="fas fa-user"></i> Mi perfil</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item logout" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a></li>
+          </ul>
+        </li>
       </ul>
     </div>
   </div>
 </nav>
+
+{% else %}
+<!-- Barra de navegación simplificada para usuario no logueado -->
+<nav class="navbar navbar-not-logged">
+  <a class="navbar-brand" href="/">
+    <img src="{% static 'images/Logo.png' %}" alt="Logo" class="logo">
+  </a>
+  
+  <div class="auth-buttons">
+    <a href="{% url 'login' %}" class="login-btn">Iniciar sesión</a>
+    <a href="{% url 'registrar' %}" class="register-btn">Registrarse</a>
+  </div>
+</nav>
+{% endif %}

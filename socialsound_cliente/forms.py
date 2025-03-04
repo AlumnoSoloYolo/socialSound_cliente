@@ -8,6 +8,7 @@ import re
 
 
 
+
 class BusquedaUsuarioForm(forms.Form):
     textoBusqueda = forms.CharField(required=True)
 

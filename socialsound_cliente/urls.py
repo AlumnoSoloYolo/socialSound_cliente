@@ -40,7 +40,18 @@ urlpatterns = [
      path('detalles-album/crear/', detalle_album_crear, name='detalle_album_crear'),
      path('detalles-album/editar/<int:id>/', detalle_album_editar, name='detalle_album_editar'),
 
-     path('registrar/', registrar_usuario, name='registrar_usuario'),
-      path('login/', login_usuario, name='login_usuario'),
+     path('registrar/', registrar_usuario, name='registrar'),
+     path('login/', login_usuario, name='login'),
+     path('logout/', logout, name='logout'),
+
+     path('perfil/', perfil_usuario, name='perfil_usuario'),
+     path('perfil/<int:usuario_id>/', perfil_usuario, name='perfil_usuario_detalle'),
+     path('usuario/<str:nombre_usuario>/albumes/', albumes_usuario, name='albumes_usuario'),
+
+     path('cancion/<int:cancion_id>/like/', dar_like, name='dar_like'),
+     path('cancion/<int:cancion_id>/unlike/', quitar_like, name='quitar_like'),
+
+     path('usuario/<int:usuario_id>/seguir/', seguir, name='seguir_usuario'),
+     path('usuario/<int:usuario_id>/dejar-seguir/', dejar_seguir, name='dejar_seguir_usuario'),
 
 ]
