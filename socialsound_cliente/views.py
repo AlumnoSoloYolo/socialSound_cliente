@@ -1648,6 +1648,9 @@ def dejar_seguir(request, usuario_id):
 
 
 
+def cors_prueba(request):
+    return render(request, 'prueba_cors.html')
+
 
 
 

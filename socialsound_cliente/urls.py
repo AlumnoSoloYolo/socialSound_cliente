@@ -54,4 +54,6 @@ urlpatterns = [
      path('usuario/<int:usuario_id>/seguir/', seguir, name='seguir_usuario'),
      path('usuario/<int:usuario_id>/dejar-seguir/', dejar_seguir, name='dejar_seguir_usuario'),
 
+     path('cors-prueba/', cors_prueba, name='cors_prueba'),
+
 ]

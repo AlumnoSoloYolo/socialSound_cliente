@@ -1,0 +1,86 @@
+{% extends 'principal.html' %}
+{% load static %}
+
+{% block title %}Prueba de CORS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cors-container {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 30px;
+        background-color: rgba(0, 0, 0, 0.7);
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+    }
+    
+    h1 {
+        color: #0ff;
+        text-align: center;
+        margin-bottom: 30px;
+        text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    }
+    
+    .info-box {
+        background-color: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    #cors-result {
+        min-height: 100px;
+    }
+    
+    .test-btn {
+        background-color: #0ff;
+        color: #000;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    
+    .test-btn:hover {
+        background-color: #00cccc;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+    }
+    
+    .code-block {
+        background-color: rgba(0, 0, 0, 0.5);
+        border-radius: 5px;
+        padding: 15px;
+        margin: 15px 0;
+        font-family: monospace;
+        white-space: pre-wrap;
+        overflow-x: auto;
+        color: #0ff;
+    }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<div class="cors-container">
+    <h1>Prueba de Configuración CORS</h1>
+    
+
+    <div class="text-center mb-4">
+        <button id="test-cors-btn" class="test-btn" onclick="pruebaCORS()">
+            Probar CORS
+        </button>
+    </div>
+    
+    <div id="cors-result" class="alert alert-secondary">
+        <p>Haz clic en el botón para probar la configuración de CORS.</p>
+    </div>
+    
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script src="{% static 'js/prueba_cors.js' %}"></script>
+{% endblock %}
