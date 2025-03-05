@@ -50,6 +50,8 @@ def lista_playlists_api(request):
 
 
 
+from urllib.parse import urlparse
+
 def lista_albumes_api(request):
     try:
         headers = helper.crear_cabecera(request)
@@ -57,21 +59,21 @@ def lista_albumes_api(request):
         if response.status_code == 200:
             albumes = response.json()
             for album in albumes:
-                album['portada_url'] = f"{settings.API_MEDIA_URL}{urlparse(album['portada'])}"
+               
+                album['portada_url'] = f"{settings.API_MEDIA_URL}{urlparse(album['portada']).path if album.get('portada') else ''}"
                 
                 if 'canciones' in album:
                     for cancion in album['canciones']:
                         if 'portada' in cancion:
-                            cancion['portada_url'] = f"{settings.API_MEDIA_URL}{urlparse(cancion['portada'])}"
+                            cancion['portada_url'] = f"{settings.API_MEDIA_URL}{urlparse(cancion['portada']).path if cancion.get('portada') else ''}"
                         if 'archivo_audio' in cancion:
-                            cancion['archivo_audio_url'] = f"{settings.API_MEDIA_URL}{urlparse(cancion['archivo_audio'])}"
+                            cancion['archivo_audio_url'] = f"{settings.API_MEDIA_URL}{urlparse(cancion['archivo_audio']).path if cancion.get('archivo_audio') else ''}"
         else:
             albumes = []
     except requests.exceptions.RequestException as e:
         albumes = []
         print(f"Error al obtener los álbumes: {e}")
 
-    # Pasar los álbumes al template
     return render(request, 'albums/lista_albumes_completa.html', {'albumes_mostrar': albumes})
 
             
@@ -120,13 +122,13 @@ def lista_usuarios_completa_api(request):
             if 'seguidores' in usuario and usuario['seguidores']: 
                 for seguidor in usuario['seguidores']:
                     if 'seguidor' in seguidor and 'foto_perfil' in seguidor['seguidor']:
-                        seguidor['seguidor']['foto_perfil_url'] = f"{settings.API_MEDIA_URL}{urlparse(seguidor['seguidor']['foto_perfil'])}"
+                        seguidor['seguidor']['foto_perfil_url'] = f"{settings.API_MEDIA_URL}{urlparse(seguidor['seguidor']['foto_perfil']).path}"
 
           
             if 'seguidos' in usuario and usuario['seguidos']: 
                 for seguido in usuario['seguidos']:
                     if 'seguido' in seguido and 'foto_perfil' in seguido['seguido']:
-                        seguido['seguido']['foto_perfil_url'] = f"{settings.API_MEDIA_URL}{urlparse(seguido['seguido']['foto_perfil'])}"
+                        seguido['seguido']['foto_perfil_url'] = f"{settings.API_MEDIA_URL}{urlparse(seguido['seguido']['foto_perfil']).path}"
             
          
             if 'seguidores' in usuario and usuario['seguidores'] and request.session.get('usuario'):
@@ -158,9 +160,9 @@ def lista_canciones_api(request):
 
         for cancion in canciones:
             if 'portada' in cancion:
-                cancion['portada_url'] = f"{settings.API_MEDIA_URL}{urlparse(cancion['portada'])}"
+                cancion['portada_url'] = f"{settings.API_MEDIA_URL}{urlparse(cancion['portada']).path}"
             if 'archivo_audio' in cancion:
-                cancion['archivo_audio_url'] = f"{settings.API_MEDIA_URL}{urlparse(cancion['archivo_audio'])}"
+                cancion['archivo_audio_url'] = f"{settings.API_MEDIA_URL}{urlparse(cancion['archivo_audio']).path}"
             
             # Obtener el conteo de likes como un número
             cancion['num_likes'] = len(cancion.get('likes', []))
@@ -1326,7 +1328,7 @@ def registrar_usuario(request):
                 
              
                 response = requests.post(
-                    'http://127.0.0.1:8000/api/v1/registrar/usuario/',
+                    settings.API_URL + '/registrar/usuario/',
                     headers=headers,
                     data=json.dumps(data)
                 )
